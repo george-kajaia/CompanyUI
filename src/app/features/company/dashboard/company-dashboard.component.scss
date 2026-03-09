@@ -1,0 +1,512 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// User theme colors - Light with blue tint
+$dash-bg-base: #f8fafc;
+$dash-bg-surface: #ffffff;
+$dash-bg-elevated: #f0f9ff;
+$dash-bg-hover: #e0f2fe;
+$dash-primary: #06b6d4;
+$dash-secondary: #3b82f6;
+$dash-accent: #10b981;
+$dash-text-primary: #0c4a6e;
+$dash-text-secondary: #0369a1;
+$dash-text-muted: #64748b;
+$dash-border-subtle: #e0f2fe;
+$dash-border-default: #bae6fd;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $dash-bg-base;
+  color: $dash-text-primary;
+  font-family: $font-family-base;
+}
+
+// ============================================
+// Dashboard Container Block
+// ============================================
+.dashboard-container {
+  @include container;
+  padding-block: $space-8;
+
+  > h2 {
+    @include text-title;
+    margin-bottom: $space-6;
+  }
+}
+
+// ============================================
+// Company Info Block
+// ============================================
+.company-info {
+  padding: $space-4;
+  background: $dash-bg-surface;
+  border: 1px solid $dash-border-subtle;
+  border-radius: $radius-lg;
+  margin-bottom: $space-6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  &-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $space-3 $space-6;
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: $space-3;
+    }
+  }
+}
+
+.label {
+  @include text-caption;
+  color: $dash-text-muted;
+  min-width: 80px;
+}
+
+.value {
+  @include text-small;
+  font-weight: $font-weight-medium;
+  color: $dash-text-primary;
+}
+
+// ============================================
+// Badge Modifiers
+// ============================================
+.badge-active {
+  display: inline-flex;
+  padding: $space-1 $space-2;
+  background: rgba($success-500, 0.15);
+  border: 1px solid rgba($success-500, 0.3);
+  border-radius: $radius-full;
+  color: $success-400;
+  font-size: $font-size-xs;
+}
+
+.badge-inactive {
+  display: inline-flex;
+  padding: $space-1 $space-2;
+  background: rgba($error-500, 0.15);
+  border: 1px solid rgba($error-500, 0.3);
+  border-radius: $radius-full;
+  color: $error-400;
+  font-size: $font-size-xs;
+}
+
+// ============================================
+// Tabs Block
+// ============================================
+.tabs {
+  display: flex;
+  gap: $space-2;
+  margin-bottom: $space-4;
+}
+
+.tab {
+  padding: $space-2 $space-4;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $dash-text-secondary;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover:not(.active) {
+    background: $dash-primary;
+    color: #ffffff;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, $dash-primary, $dash-secondary);
+    color: #ffffff;
+  }
+}
+
+// ============================================
+// Panel Block
+// ============================================
+.panel {
+  padding: $space-5;
+  background: $dash-bg-surface;
+  border: 1px solid $dash-border-subtle;
+  border-radius: $radius-lg;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  &-header {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $space-3;
+    margin-bottom: $space-4;
+
+    h3 {
+      @include text-heading;
+      margin: 0;
+      color: $dash-text-primary;
+    }
+  }
+}
+
+// ============================================
+// Actions Block
+// ============================================
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+// ============================================
+// Search Row Block
+// ============================================
+.search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  align-items: center;
+  margin-bottom: $space-4;
+
+  input {
+    width: 280px;
+    max-width: 100%;
+  }
+}
+
+// ============================================
+// Table (Grid) Block
+// ============================================
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: $space-2;
+  background: $dash-bg-surface;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  th,
+  td {
+    padding: $space-3;
+    text-align: left;
+    font-size: $font-size-sm;
+    border-bottom: 1px solid $dash-border-subtle;
+  }
+
+  th {
+    background: $dash-bg-elevated;
+    color: $dash-text-secondary;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    color: $dash-text-primary;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: rgba($dash-primary, 0.08);
+    }
+
+    &.selected {
+      background: rgba($dash-primary, 0.12);
+      outline: 2px solid rgba($dash-primary, 0.5);
+      outline-offset: -2px;
+    }
+  }
+}
+
+.row-actions {
+  display: flex;
+  gap: $space-2;
+  align-items: center;
+}
+
+
+// ============================================
+// Button Styles
+// ============================================
+button {
+  padding: $space-2 $space-3;
+  background: $dash-bg-surface;
+  border: 1px solid $dash-border-default;
+  border-radius: $radius-md;
+  color: $dash-text-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all $transition-base;
+  @include hover-lift;
+
+  &:hover:not(:disabled) {
+    background: rgba($dash-primary, 0.1);
+    border-color: $dash-primary;
+    color: $dash-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.secondary {
+    background: transparent;
+    border-color: $dash-border-subtle;
+    color: $dash-text-secondary;
+
+    &:hover:not(:disabled) {
+      background: rgba($dash-primary, 0.1);
+      border-color: $dash-primary;
+      color: $dash-primary;
+    }
+  }
+
+  &.danger {
+    background: rgba($error-500, 0.10);
+    border-color: rgba($error-500, 0.40);
+    color: $error-400;
+
+    &:hover:not(:disabled) {
+      background: rgba($error-500, 0.16);
+      border-color: rgba($error-500, 0.55);
+    }
+  }
+
+}
+
+// ============================================
+// Input & Select Styles
+// ============================================
+input,
+select {
+  padding: $space-2 $space-3;
+  background: $dash-bg-base;
+  border: 1px solid $dash-border-default;
+  border-radius: $radius-md;
+  color: $dash-text-primary;
+  font-size: $font-size-sm;
+  transition: border-color $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $dash-primary;
+  }
+
+  &::placeholder {
+    color: $dash-text-muted;
+  }
+}
+
+select {
+  cursor: pointer;
+}
+
+// ============================================
+// Messages
+// ============================================
+.info {
+  padding: $space-3;
+  background: rgba($dash-primary, 0.1);
+  border: 1px solid rgba($dash-primary, 0.3);
+  border-radius: $radius-md;
+  color: $dash-primary;
+  font-size: $font-size-sm;
+}
+
+.error {
+  padding: $space-3;
+  background: rgba($error-500, 0.1);
+  border: 1px solid rgba($error-500, 0.3);
+  border-radius: $radius-md;
+  color: $error-500;
+  font-size: $font-size-sm;
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+
+  .error-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+// Form validation
+.validation-error {
+  display: block;
+  margin-top: $space-1;
+  color: $error-500;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+label.has-error {
+  input, select, textarea {
+    border-color: $error-500;
+
+    &:focus {
+      border-color: $error-500;
+      box-shadow: 0 0 0 2px rgba($error-500, 0.2);
+    }
+  }
+}
+
+.muted {
+  padding: $space-4;
+  color: $dash-text-muted;
+  font-size: $font-size-sm;
+  text-align: center;
+}
+
+.hint {
+  margin-top: $space-4;
+  padding-top: $space-3;
+  border-top: 1px solid $dash-border-subtle;
+  color: $dash-text-muted;
+  font-size: $font-size-xs;
+}
+
+// ============================================
+// Back Link
+// ============================================
+.back-link {
+  display: inline-block;
+  margin-top: $space-6;
+  color: $dash-primary;
+  font-size: $font-size-sm;
+  text-decoration: none;
+  transition: color $transition-base;
+
+  &:hover {
+    color: lighten($dash-primary, 10%);
+    text-decoration: underline;
+  }
+}
+
+// ============================================
+// Modal Block
+// ============================================
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  @include flex-center;
+  padding: $space-4;
+  z-index: $z-modal-backdrop;
+}
+
+.modal {
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: $dash-bg-surface;
+  border: 1px solid $dash-border-default;
+  border-radius: $radius-xl;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+
+  &-header {
+    @include flex-between;
+    padding: $space-4 $space-5;
+    border-bottom: 1px solid $dash-border-subtle;
+
+    h3 {
+      @include text-heading;
+      margin: 0;
+      color: $dash-text-primary;
+    }
+  }
+
+  &-body {
+    padding: $space-5;
+  }
+
+  &-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+    margin-top: $space-4;
+  }
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: $radius-full;
+  @include flex-center;
+  font-size: $font-size-lg;
+  background: $dash-bg-elevated;
+  border: 1px solid $dash-border-default;
+  color: $dash-text-secondary;
+
+  &:hover {
+    background: $dash-bg-hover;
+    color: $dash-text-primary;
+  }
+}
+
+// ============================================
+// Details Block (Modal View)
+// ============================================
+.details {
+  display: grid;
+  gap: $space-2;
+
+  > div {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: $space-3;
+    padding: $space-3;
+    background: $dash-bg-elevated;
+    border: 1px solid $dash-border-subtle;
+    border-radius: $radius-md;
+  }
+
+  dt {
+    color: $dash-text-muted;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+  }
+
+  dd {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $dash-text-primary;
+  }
+}
+
+// ============================================
+// Form Block (Modal Add/Edit)
+// ============================================
+.form {
+  display: grid;
+  gap: $space-4;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    font-size: $font-size-sm;
+    color: $dash-text-secondary;
+  }
+
+  input,
+  select {
+    margin-top: 0;
+  }
+}
+
+.helper {
+  color: $dash-text-muted;
+  font-size: $font-size-xs;
+}
