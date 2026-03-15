@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { CompanyApiService } from '../../../core/api/company-api.service';
 import { CompanyStateService } from '../../../core/state/company-state.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -13,20 +13,11 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './company-login.component.html',
   styleUrls: ['./company-login.component.scss']
 })
-export class CompanyLoginComponent {
+export class CompanyLoginComponent implements OnInit {
   isRegisterMode = false;
 
-  loginModel = {
-    userName: '',
-    password: ''
-  };
-
-  registerModel = {
-    name: '',
-    taxCode: '',
-    userName: '',
-    password: ''
-  };
+  loginModel = { userName: '', password: '' };
+  registerModel = { name: '', taxCode: '', userName: '', password: '' };
 
   loading = false;
   private toast = inject(ToastService);
@@ -34,16 +25,23 @@ export class CompanyLoginComponent {
   constructor(
     private companyApi: CompanyApiService,
     private companyState: CompanyStateService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
-  toggleMode() {
-    this.isRegisterMode = !this.isRegisterMode;
+  ngOnInit(): void {
+    // Auto-switch to register mode if ?mode=register
+    this.route.queryParams.subscribe(params => {
+      if (params['mode'] === 'register') {
+        this.isRegisterMode = true;
+      }
+    });
   }
+
+  toggleMode() { this.isRegisterMode = !this.isRegisterMode; }
 
   onLogin() {
     this.loading = true;
-
     this.companyApi.login(this.loginModel).subscribe({
       next: companyUser => {
         this.companyState.companyUser = companyUser;
@@ -53,22 +51,10 @@ export class CompanyLoginComponent {
             this.companyState.company = company;
             this.router.navigate(['/dashboard']);
           },
-          error: err => {
-            this.loading = false;
-            console.error(err);
-
-            const message = typeof err.error === 'string' ? err.error : err.error?.message;
-            this.toast.error(message);            
-          }
+          error: err => { this.loading = false; this.toast.error(err.error?.message ?? err.error); }
         });
       },
-      error: err => {
-        this.loading = false;
-        console.error(err);
-
-        const message = typeof err.error === 'string' ? err.error : err.error?.message;
-        this.toast.error(message);        
-      }
+      error: err => { this.loading = false; this.toast.error(err.error?.message ?? err.error); }
     });
   }
 
@@ -80,13 +66,7 @@ export class CompanyLoginComponent {
         this.toast.success('Registration successful! You can now login with your credentials.');
         this.isRegisterMode = false;
       },
-      error: err => {
-        this.loading = false;
-        console.error(err);
-        
-        const message = typeof err.error === 'string' ? err.error : err.error?.message;
-        this.toast.error(message);
-      }
+      error: err => { this.loading = false; this.toast.error(err.error?.message ?? err.error); }
     });
   }
 }
