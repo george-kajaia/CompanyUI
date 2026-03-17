@@ -54,8 +54,8 @@ $dash-border-default: #bae6fd;
 
     > div {
       display: flex;
-      align-items: center;
-      gap: $space-3;
+      flex-direction: column;
+      gap: $space-1;
     }
   }
 }
@@ -63,7 +63,6 @@ $dash-border-default: #bae6fd;
 .label {
   @include text-caption;
   color: $dash-text-muted;
-  min-width: 80px;
 }
 
 .value {
