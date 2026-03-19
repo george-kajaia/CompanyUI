@@ -1,0 +1,248 @@
+// Company blue palette
+$primary:      #1a56db;
+$primary-dark: #1e40af;
+$primary-bg:   #eff6ff;
+$border:       #bfdbfe;
+$surface:      #ffffff;
+$text:         #0c4a6e;
+$text-muted:   #64748b;
+$success:      #059669;
+$error:        #dc2626;
+
+// ── Backdrop ──────────────────────────────────────────────────
+.scan-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+.scan-modal {
+  position: relative;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 380px;
+  padding: 32px 24px 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+
+  &__close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: $text-muted;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+    &:hover { background: #f1f5f9; color: $text; }
+  }
+
+  &__header {
+    text-align: center;
+    width: 100%;
+  }
+
+  &__title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $text;
+    margin: 0 0 4px;
+  }
+
+  &__subtitle {
+    font-size: 0.85rem;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  // ── Camera ───────────────────────────────────────────────
+  &__camera-wrap {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  &__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+
+    &--hidden {
+      display: none;
+    }
+  }
+
+  // ── Viewfinder overlay ────────────────────────────────────
+  &__viewfinder {
+    position: absolute;
+    inset: 20px;
+    pointer-events: none;
+  }
+
+  &__corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: #fff;
+    border-style: solid;
+
+    &--tl { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    &--tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+    &--bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+    &--br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+  }
+
+  &__scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, $primary, transparent);
+    animation: scan 2s ease-in-out infinite;
+  }
+
+  // ── Token details ─────────────────────────────────────────
+  &__token-details {
+    width: 100%;
+    background: $primary-bg;
+    border: 1px solid $border;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  // ── Footer ───────────────────────────────────────────────
+  &__footer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+
+    &--confirm {
+      justify-content: space-between;
+    }
+  }
+
+  // ── State (loading / error) ───────────────────────────────
+  &__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 0;
+    color: $text-muted;
+    font-size: 0.9rem;
+
+    &--error {
+      color: $error;
+    }
+
+    &-icon {
+      font-size: 2.5rem;
+    }
+  }
+}
+
+// ── Token detail rows ─────────────────────────────────────────
+.token-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid $border;
+
+  &:last-child { border-bottom: none; }
+
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+
+  &__value {
+    font-size: 0.88rem;
+    color: $text;
+    font-weight: 500;
+    text-align: right;
+
+    &--highlight {
+      color: $primary;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+  }
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+// ── Scan line animation ────────────────────────────────────────
+@keyframes scan {
+  0%   { top: 0; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+// ── Spinner ───────────────────────────────────────────────────
+.scan-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $border;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Buttons ───────────────────────────────────────────────────
+.scan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+
+  &--ghost {
+    background: transparent;
+    border: 1px solid $border;
+    color: $text-muted;
+    &:hover { background: $primary-bg; color: $text; border-color: $primary; }
+  }
+
+  &--confirm {
+    background: $success;
+    color: #fff;
+    &:hover { background: darken($success, 6%); box-shadow: 0 4px 12px rgba($success, 0.3); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}

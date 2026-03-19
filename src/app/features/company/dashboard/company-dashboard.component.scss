@@ -37,6 +37,47 @@ $dash-border-default: #bae6fd;
 }
 
 // ============================================
+// Dashboard Header with Scan Button
+// ============================================
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $space-6;
+
+  h2 {
+    @include text-title;
+    margin: 0;
+  }
+}
+
+.scan-token-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: $dash-primary;
+  color: #fff;
+  border: none;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba($dash-primary, 0.25);
+
+  &:hover {
+    background: darken($dash-primary, 8%);
+    box-shadow: 0 4px 14px rgba($dash-primary, 0.35);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
 // Company Info Block
 // ============================================
 .company-info {

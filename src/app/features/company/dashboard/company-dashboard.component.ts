@@ -13,6 +13,7 @@ import { Company } from '../../../shared/models/company.model';
 import { Request, RequestStatus } from '../../../shared/models/request.model';
 import { Product, SchedulePeriodType } from '../../../shared/models/product.model';
 import { RequestDto } from '../../../shared/models/dtos.model';
+import { ScanTokenComponent } from '../scan-token/scan-token.component';
 
 type CompanyTab = 'requests' | 'products';
 type ModalMode =
@@ -27,7 +28,7 @@ type ModalMode =
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ScanTokenComponent],
   templateUrl: './company-dashboard.component.html',
   styleUrls: ['./company-dashboard.component.scss']
 })
@@ -35,6 +36,9 @@ export class CompanyDashboardComponent implements OnInit {
   company: Company | null = null;
 
   activeTab: CompanyTab = 'requests';
+
+  // Scan Token overlay
+  showScanner = false;
 
   // Requests tab state
   requests: Request[] = [];

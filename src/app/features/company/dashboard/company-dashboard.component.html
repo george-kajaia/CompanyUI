@@ -1,5 +1,10 @@
 <div class="dashboard-container" *ngIf="company">
-  <h2>Company Dashboard</h2>
+  <div class="dashboard-header">
+    <h2>Company Dashboard</h2>
+    <button class="scan-token-btn" (click)="showScanner = true">
+      📷 Scan Token
+    </button>
+  </div>
 
   <section class="company-info">
     <div class="company-info-grid">
@@ -299,3 +304,9 @@
     </div>
   </div>
 </div>
+
+<!-- ═══ SCAN TOKEN OVERLAY ══════════════════════════════════ -->
+<app-scan-token
+  *ngIf="showScanner"
+  (closed)="showScanner = false">
+</app-scan-token>
