@@ -550,3 +550,61 @@ label.has-error {
   color: $dash-text-muted;
   font-size: $font-size-xs;
 }
+
+// ============================================
+// Pictogram Upload
+// ============================================
+.pictogram-upload {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  input[type="file"] {
+    font-size: $font-size-sm;
+    color: $dash-text-primary;
+    cursor: pointer;
+  }
+}
+
+.pictogram-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $space-2;
+
+  img {
+    max-width: 160px;
+    max-height: 160px;
+    border-radius: $radius-md;
+    border: 2px solid $dash-border-default;
+    object-fit: contain;
+    background: $dash-bg-elevated;
+    padding: $space-2;
+  }
+}
+
+// ============================================
+// Pictogram View (in product detail modal)
+// ============================================
+.pictogram-view {
+  margin-top: $space-4;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  .label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $dash-text-secondary;
+  }
+}
+
+.pictogram-img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: $radius-md;
+  border: 2px solid $dash-border-default;
+  object-fit: contain;
+  background: $dash-bg-elevated;
+  padding: $space-2;
+}

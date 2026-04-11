@@ -41,4 +41,20 @@ export class ProductApiService {
     // Backend signature: Delete(int productId) (productId bound from query string)
     return this.http.delete<void>(`${this.baseUrl}/Delete?productId=${productId}`);
   }
+
+  addPictogram(productId: number, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('pictogram', file);
+    return this.http.post<void>(`${this.baseUrl}/${productId}/Pictogram`, formData);
+  }
+
+  updatePictogram(productId: number, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('pictogram', file);
+    return this.http.put<void>(`${this.baseUrl}/${productId}/Pictogram`, formData);
+  }
+
+  getPictogramUrl(productId: number): string {
+    return `${this.baseUrl}/${productId}/Pictogram`;
+  }
 }

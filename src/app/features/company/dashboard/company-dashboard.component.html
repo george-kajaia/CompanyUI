@@ -219,6 +219,16 @@
             <div><dt>Term</dt><dd>{{ modalProduct.term ?? '-' }}</dd></div>
             <div><dt>Schedule Type</dt><dd>{{ scheduleTypeLabel(modalProduct.scheduleType.periodType, modalProduct.scheduleType.periodNumber) }}</dd></div>
           </dl>
+          <div class="pictogram-view">
+            <span class="label">Pictogram</span>
+            <img
+              [src]="productApi.getPictogramUrl(modalProduct.id)"
+              alt="Product pictogram"
+              class="pictogram-img"
+              (error)="pictogramImgEl.style.display='none'; noPictogramMsg.style.display='block'"
+              #pictogramImgEl />
+            <span #noPictogramMsg class="muted" style="display:none">No pictogram uploaded.</span>
+          </div>
         </ng-container>
 
         <!-- Product Add/Edit -->
@@ -290,6 +300,20 @@
               Schedule Period Number (optional)
               <input type="number" [(ngModel)]="productForm.scheduleType.periodNumber" name="periodNumber" min="1" />
               <span class="helper">Label: {{ scheduleTypeLabel(productForm.scheduleType.periodType, productForm.scheduleType.periodNumber) }}</span>
+            </label>
+
+            <label>
+              Pictogram (optional, image file)
+              <div class="pictogram-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="onPictogramSelected($event)" />
+                <div *ngIf="pictogramPreviewUrl" class="pictogram-preview">
+                  <img [src]="pictogramPreviewUrl" alt="Pictogram preview" />
+                  <span *ngIf="pictogramExistsOnServer && !pictogramFile" class="helper">Current pictogram — select a file to replace it</span>
+                </div>
+              </div>
             </label>
 
             <div class="modal-actions">

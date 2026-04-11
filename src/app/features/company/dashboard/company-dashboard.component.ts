@@ -79,6 +79,11 @@ export class CompanyDashboardComponent implements OnInit {
     scheduleType: { periodType: SchedulePeriodType.None, periodNumber: null }
   };
 
+  // Pictogram state
+  pictogramFile: File | null = null;
+  pictogramPreviewUrl: string | null = null;
+  pictogramExistsOnServer = false;
+
   private toast = inject(ToastService);
   private dialog = inject(DialogService);
 
@@ -86,7 +91,7 @@ export class CompanyDashboardComponent implements OnInit {
     private router: Router,
     private companyState: CompanyStateService,
     private requestApi: RequestApiService,
-    private productApi: ProductApiService
+    public productApi: ProductApiService
   ) {}
 
   ngOnInit(): void {
@@ -420,7 +425,23 @@ export class CompanyDashboardComponent implements OnInit {
       scheduleType: { periodType: SchedulePeriodType.None, periodNumber: null }
     };
 
+    this.pictogramFile = null;
+    this.pictogramPreviewUrl = null;
+    this.pictogramExistsOnServer = false;
     this.openModal('productAdd', 'Add new product');
+  }
+
+  onPictogramSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.pictogramFile = file;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => (this.pictogramPreviewUrl = reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      this.pictogramPreviewUrl = null;
+    }
   }
 
   submitProductAdd() {
@@ -436,15 +457,57 @@ export class CompanyDashboardComponent implements OnInit {
 
     this.productApi.create(payload).subscribe({
       next: _ => {
-        this.modalLoading = false;
-        this.closeModal();
-        this.reloadProducts(true);
-        this.toast.success('Product created successfully.');
+        // Product created — now upload pictogram if one was selected.
+        // We need the new product's ID, so we reload products to find it by name+companyId.
+        if (this.pictogramFile) {
+          this.reloadProducts(true);
+          // Find the newly created product by reloading and matching name
+          this.productApi.getAll(0, 200, payload.name).subscribe({
+            next: all => {
+              const created = all
+                .filter(p => p.companyId === this.company!.id && p.name === payload.name)
+                .sort((a, b) => b.id - a.id)[0];
+
+              if (created && this.pictogramFile) {
+                this.productApi.addPictogram(created.id, this.pictogramFile).subscribe({
+                  next: () => {
+                    this.modalLoading = false;
+                    this.closeModal();
+                    this.reloadProducts(true);
+                    this.toast.success('Product created successfully with pictogram.');
+                  },
+                  error: err => {
+                    this.modalLoading = false;
+                    this.closeModal();
+                    this.reloadProducts(true);
+                    const message = typeof err.error === 'string' ? err.error : err.error?.message;
+                    this.toast.error(`Product created but pictogram upload failed: ${message}`);
+                  }
+                });
+              } else {
+                this.modalLoading = false;
+                this.closeModal();
+                this.reloadProducts(true);
+                this.toast.success('Product created successfully.');
+              }
+            },
+            error: () => {
+              this.modalLoading = false;
+              this.closeModal();
+              this.reloadProducts(true);
+              this.toast.success('Product created. Pictogram upload skipped (could not resolve new product ID).');
+            }
+          });
+        } else {
+          this.modalLoading = false;
+          this.closeModal();
+          this.reloadProducts(true);
+          this.toast.success('Product created successfully.');
+        }
       },
       error: err => {
         console.error(err);
         this.modalLoading = false;
-
         const message = typeof err.error === 'string' ? err.error : err.error?.message;
         this.toast.error(message);
       }
@@ -459,19 +522,34 @@ export class CompanyDashboardComponent implements OnInit {
   private openProductEdit(productId: number) {
     this.openModal('productEdit', 'Edit product');
     this.modalLoading = true;
+    this.pictogramFile = null;
+    this.pictogramPreviewUrl = null;
+    this.pictogramExistsOnServer = false;
 
     this.productApi.getById(productId).subscribe({
       next: prod => {
         const term = prod.term === undefined ? null : prod.term;
         const scheduleType = prod.scheduleType ?? { periodType: SchedulePeriodType.None, periodNumber: null };
         this.productForm = { ...prod, term: term as any, scheduleType };
-        this.modalLoading = false;
+
+        // Check if a pictogram already exists by trying to load it
+        const img = new Image();
+        img.onload = () => {
+          this.pictogramExistsOnServer = true;
+          this.pictogramPreviewUrl = this.productApi.getPictogramUrl(productId);
+          this.modalLoading = false;
+        };
+        img.onerror = () => {
+          this.pictogramExistsOnServer = false;
+          this.modalLoading = false;
+        };
+        img.src = this.productApi.getPictogramUrl(productId);
       },
       error: err => {
         console.error(err);
         this.modalLoading = false;
         this.closeModal();
-        
+
         const message = typeof err.error === 'string' ? err.error : err.error?.message;
         this.toast.error(message);
       }
@@ -485,23 +563,42 @@ export class CompanyDashboardComponent implements OnInit {
     this.modalError = '';
 
     const productId = this.productForm.id;
-
-    // Ensure companyId is preserved
     const payload: Product = { ...this.productForm, companyId: this.company.id };
 
     this.productApi.update(productId, payload).subscribe({
       next: _ => {
-        this.modalLoading = false;
-        this.closeModal();
-        this.reloadProducts(true);
-        // If edit was invoked from Requests tab, refresh Requests as well (productId referenced there)
-        this.loadRequests(true);
-        this.toast.success('Product updated successfully.');
+        if (this.pictogramFile) {
+          const upload$ = this.pictogramExistsOnServer
+            ? this.productApi.updatePictogram(productId, this.pictogramFile)
+            : this.productApi.addPictogram(productId, this.pictogramFile);
+
+          upload$.subscribe({
+            next: () => {
+              this.modalLoading = false;
+              this.closeModal();
+              this.reloadProducts(true);
+              this.loadRequests(true);
+              this.toast.success('Product updated successfully with pictogram.');
+            },
+            error: err => {
+              this.modalLoading = false;
+              this.closeModal();
+              this.reloadProducts(true);
+              const message = typeof err.error === 'string' ? err.error : err.error?.message;
+              this.toast.error(`Product updated but pictogram upload failed: ${message}`);
+            }
+          });
+        } else {
+          this.modalLoading = false;
+          this.closeModal();
+          this.reloadProducts(true);
+          this.loadRequests(true);
+          this.toast.success('Product updated successfully.');
+        }
       },
       error: err => {
         console.error(err);
         this.modalLoading = false;
-        
         const message = typeof err.error === 'string' ? err.error : err.error?.message;
         this.toast.error(message);
       }

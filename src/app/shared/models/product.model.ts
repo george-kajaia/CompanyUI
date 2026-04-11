@@ -20,4 +20,5 @@ export interface Product {
   price: number;
   term?: number | null;
   scheduleType: ScheduleType;
+  pictogramUrl?: string | null;
 }
