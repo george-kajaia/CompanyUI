@@ -32,7 +32,7 @@ export class ScanTokenComponent implements OnInit, AfterViewInit, OnDestroy {
   errorMessage = '';
 
   token: ServiceTokenDto | null = null;
-  private payload: QrPayload | null = null;
+  payload: QrPayload | null = null;
 
   private reader = new BrowserMultiFormatReader();
   private controls: IScannerControls | null = null;
@@ -95,26 +95,9 @@ export class ScanTokenComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Fetch full token details to show in confirmation modal
     this.state = 'loading';
-    this.serviceTokenApi.getById(this.payload.tokenId).subscribe({
-      next: token => {
-        this.token = token;
-        this.state = 'confirm';
-      },
-      error: err => {
-        this.state = 'error';
-        this.errorMessage = err.error?.message ?? err.error ?? 'Token not found.';
-      }
-    });
-  }
-
-  confirm(): void {
-    if (!this.payload || !this.token) return;
-    this.state = 'submitting';
-
     this.serviceTokenApi.getService(
       this.payload.tokenId,
       this.payload.rowVersion,
-      this.token.companyId,
       this.payload.connectionId
     ).subscribe({
       next: () => {

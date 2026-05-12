@@ -56,15 +56,9 @@ export class ServiceTokenApiService {
     });
   }
 
-  getById(serviceTokenId: string): Observable<ServiceTokenDto> {
-    return this.http.get<ServiceTokenDto>(`${this.baseUrl}/GetById`, {
-      params: { serviceTokenId }
-    });
-  }
-
-  getService(serviceTokenId: string, rowVersion: number, companyId: number, connectionId: string): Observable<void> {
+  getService(serviceTokenId: string, rowVersion: number, connectionId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/GetService`, null, {
-      params: { serviceTokenId, rowVersion: rowVersion.toString(), companyId: companyId.toString(), connectionId }
+      params: { serviceTokenId, rowVersion: rowVersion.toString(), connectionId }
     });
   }
 }

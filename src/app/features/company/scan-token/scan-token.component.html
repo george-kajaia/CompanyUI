@@ -77,6 +77,18 @@
           <span class="token-detail-row__label">Valid Until</span>
           <span class="token-detail-row__value">{{ token.endDate ? (token.endDate | date:'mediumDate') : 'No expiry' }}</span>
         </div>
+        <div class="token-detail-row token-detail-row--mono">
+          <span class="token-detail-row__label">Token ID</span>
+          <span class="token-detail-row__value mono">{{ payload?.tokenId }}</span>
+        </div>
+        <div class="token-detail-row token-detail-row--mono">
+          <span class="token-detail-row__label">Row Version</span>
+          <span class="token-detail-row__value mono">{{ payload?.rowVersion }}</span>
+        </div>
+        <div class="token-detail-row token-detail-row--mono">
+          <span class="token-detail-row__label">Connection ID</span>
+          <span class="token-detail-row__value mono">{{ payload?.connectionId }}</span>
+        </div>
       </div>
 
       <!-- Keep video element hidden so @ViewChild reference stays valid -->
@@ -110,6 +122,20 @@
       <div class="scan-modal__state scan-modal__state--error">
         <span class="scan-modal__state-icon">⚠</span>
         <p>{{ errorMessage }}</p>
+      </div>
+      <div class="scan-modal__token-details" *ngIf="payload">
+        <div class="token-detail-row token-detail-row--mono">
+          <span class="token-detail-row__label">Token ID</span>
+          <span class="token-detail-row__value mono">{{ payload.tokenId }}</span>
+        </div>
+        <div class="token-detail-row token-detail-row--mono">
+          <span class="token-detail-row__label">Row Version</span>
+          <span class="token-detail-row__value mono">{{ payload.rowVersion }}</span>
+        </div>
+        <div class="token-detail-row token-detail-row--mono">
+          <span class="token-detail-row__label">Connection ID</span>
+          <span class="token-detail-row__value mono">{{ payload.connectionId }}</span>
+        </div>
       </div>
       <video #videoEl class="scan-modal__video scan-modal__video--hidden" autoplay muted playsinline></video>
       <div class="scan-modal__footer">

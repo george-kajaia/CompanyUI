@@ -197,6 +197,15 @@ $error:        #dc2626;
 
 .mono { font-family: 'JetBrains Mono', monospace; }
 
+.token-detail-row--mono {
+  align-items: flex-start;
+
+  .token-detail-row__value {
+    word-break: break-all;
+    font-size: 0.78rem;
+  }
+}
+
 // ── Scan line animation ────────────────────────────────────────
 @keyframes scan {
   0%   { top: 0; opacity: 0; }
