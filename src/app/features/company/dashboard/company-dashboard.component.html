@@ -10,14 +10,19 @@
     <div class="company-info-grid">
       <div><span class="label">Id</span><span class="value">{{ company.id }}</span></div>
       <div><span class="label">Name</span><span class="value">{{ company.name }}</span></div>
-      <div><span class="label">Tax Code</span><span class="value">{{ company.taxCode }}</span></div>
+      <div><span class="label">Reg Date</span><span class="value">{{ company.regDate | date }}</span></div>
       <div>
         <span class="label">Status</span>
         <span class="value" [class.badge-active]="company.status === 1" [class.badge-inactive]="company.status !== 1">
           {{ company.status === 1 ? 'Active' : 'Not Active' }}
         </span>
       </div>
-      <div><span class="label">Reg Date</span><span class="value">{{ company.regDate | date }}</span></div>
+      <div>
+        <span class="value company-actions">
+          <button (click)="onCompanyView()">View</button>
+          <button (click)="onCompanyEdit()">Edit</button>
+        </span>
+      </div>
     </div>
   </section>
 
@@ -147,7 +152,7 @@
 
   <!-- Modal -->
   <div class="modal-backdrop" *ngIf="modalOpen">
-    <div class="modal">
+    <div class="modal" [class.wide]="modalMode === 'companyView' || modalMode === 'companyEdit'">
       <div class="modal-header">
         <h3>{{ modalTitle }}</h3>
         <button class="icon-btn" (click)="closeModal()">×</button>
@@ -162,6 +167,72 @@
           </svg>
           {{ modalError }}
         </div>
+
+        <!-- Company View / Edit (mirrors the Company Registration form) -->
+        <ng-container *ngIf="modalMode === 'companyView' || modalMode === 'companyEdit'">
+          <form (ngSubmit)="submitCompanyEdit()" class="form company-grid">
+            <label>
+              Company Name
+              <input type="text" [(ngModel)]="companyForm.name" name="cName"
+                     [readonly]="modalMode === 'companyView'" required />
+            </label>
+            <label>
+              Tax Code
+              <input type="text" [(ngModel)]="companyForm.taxCode" name="cTaxCode"
+                     [readonly]="modalMode === 'companyView'" required />
+            </label>
+
+            <label class="span-2">
+              Address
+              <input type="text" [(ngModel)]="companyForm.address" name="cAddress"
+                     [readonly]="modalMode === 'companyView'" required />
+            </label>
+
+            <label>
+              Legal Form
+              <ng-container *ngIf="modalMode === 'companyEdit'; else legalFormView">
+                <select [(ngModel)]="companyForm.legalForm" name="cLegalForm" required>
+                  <option [ngValue]="null" disabled>-- Select legal form --</option>
+                  <option *ngFor="let lf of legalForms" [ngValue]="lf.id">{{ lf.name }}</option>
+                </select>
+              </ng-container>
+              <ng-template #legalFormView>
+                <input type="text" [value]="legalFormName(companyForm.legalForm)" readonly />
+              </ng-template>
+            </label>
+
+            <label>
+              Economic Activity
+              <ng-container *ngIf="modalMode === 'companyEdit'; else economicActivityView">
+                <select [(ngModel)]="companyForm.economicActivity" name="cEconomicActivity" required>
+                  <option [ngValue]="null" disabled>-- Select economic activity --</option>
+                  <option *ngFor="let ea of economicActivities" [ngValue]="ea.id">{{ ea.name }}</option>
+                </select>
+              </ng-container>
+              <ng-template #economicActivityView>
+                <input type="text" [value]="economicActivityName(companyForm.economicActivity)" readonly />
+              </ng-template>
+            </label>
+
+            <label>
+              Email
+              <input type="email" [(ngModel)]="companyForm.mail" name="cMail"
+                     [readonly]="modalMode === 'companyView'" required />
+            </label>
+            <label>
+              Phone
+              <input type="tel" [(ngModel)]="companyForm.phone" name="cPhone"
+                     [readonly]="modalMode === 'companyView'" required />
+            </label>
+
+            <div class="modal-actions span-2">
+              <button *ngIf="modalMode === 'companyEdit'" type="submit" [disabled]="modalLoading">Save</button>
+              <button type="button" class="secondary" (click)="closeModal()">
+                {{ modalMode === 'companyView' ? 'Close' : 'Cancel' }}
+              </button>
+            </div>
+          </form>
+        </ng-container>
 
         <!-- Request View -->
         <ng-container *ngIf="modalMode === 'requestView' && modalRequest">

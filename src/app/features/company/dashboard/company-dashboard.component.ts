@@ -4,6 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { CompanyStateService } from '../../../core/state/company-state.service';
+import { CompanyApiService } from '../../../core/api/company-api.service';
+import { DomainApiService } from '../../../core/api/domain-api.service';
 import { RequestApiService } from '../../../core/api/request-api.service';
 import { ProductApiService } from '../../../core/api/product-api.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -12,12 +14,14 @@ import { DialogService } from '../../../core/services/dialog.service';
 import { Company } from '../../../shared/models/company.model';
 import { Request, RequestStatus } from '../../../shared/models/request.model';
 import { Product, SchedulePeriodType } from '../../../shared/models/product.model';
-import { RequestDto } from '../../../shared/models/dtos.model';
+import { RequestDto, DomainItemDto } from '../../../shared/models/dtos.model';
 import { ScanTokenComponent } from '../scan-token/scan-token.component';
 
 type CompanyTab = 'requests' | 'products';
 type ModalMode =
   | 'none'
+  | 'companyView'
+  | 'companyEdit'
   | 'requestView'
   | 'requestAdd'
   | 'requestEdit'
@@ -39,6 +43,29 @@ export class CompanyDashboardComponent implements OnInit {
 
   // Scan Token overlay
   showScanner = false;
+
+  // Domain lookups (for Legal Form / Economic Activity display + dropdowns)
+  legalForms: DomainItemDto[] = [];
+  economicActivities: DomainItemDto[] = [];
+
+  // Company detail form (mirrors the registration form, minus credentials).
+  companyForm: {
+    name: string;
+    taxCode: string;
+    address: string;
+    legalForm: number | null;
+    economicActivity: number | null;
+    mail: string;
+    phone: string;
+  } = {
+    name: '',
+    taxCode: '',
+    address: '',
+    legalForm: null,
+    economicActivity: null,
+    mail: '',
+    phone: ''
+  };
 
   // Requests tab state
   requests: Request[] = [];
@@ -90,6 +117,8 @@ export class CompanyDashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private companyState: CompanyStateService,
+    private companyApi: CompanyApiService,
+    private domainApi: DomainApiService,
     private requestApi: RequestApiService,
     public productApi: ProductApiService
   ) {}
@@ -102,12 +131,113 @@ export class CompanyDashboardComponent implements OnInit {
       return;
     }
 
+    this.loadDomains();
     this.loadRequests();
     this.reloadProducts();
   }
 
   setTab(tab: CompanyTab) {
     this.activeTab = tab;
+  }
+
+  // -----------------------------
+  // Domain lookups
+  // -----------------------------
+  private loadDomains() {
+    this.domainApi.getLegalForms().subscribe({
+      next: items => (this.legalForms = items ?? []),
+      error: err => console.error('Failed to load legal forms', err)
+    });
+    this.domainApi.getEconomicActivities().subscribe({
+      next: items => (this.economicActivities = items ?? []),
+      error: err => console.error('Failed to load economic activities', err)
+    });
+  }
+
+  legalFormName(id: number | null | undefined): string {
+    if (id == null) return '-';
+    return this.legalForms.find(x => x.id === id)?.name ?? `#${id}`;
+  }
+
+  economicActivityName(id: number | null | undefined): string {
+    if (id == null) return '-';
+    return this.economicActivities.find(x => x.id === id)?.name ?? `#${id}`;
+  }
+
+  // -----------------------------
+  // Company details (View / Edit)
+  // -----------------------------
+  private fillCompanyForm() {
+    if (!this.company) return;
+    this.companyForm = {
+      name: this.company.name,
+      taxCode: this.company.taxCode,
+      address: this.company.address,
+      legalForm: this.company.legalForm,
+      economicActivity: this.company.economicActivity,
+      mail: this.company.mail,
+      phone: this.company.phone
+    };
+  }
+
+  onCompanyView() {
+    if (!this.company) return;
+    this.fillCompanyForm();
+    this.openModal('companyView', 'Company details');
+  }
+
+  onCompanyEdit() {
+    if (!this.company) return;
+    this.fillCompanyForm();
+    this.openModal('companyEdit', 'Edit company');
+  }
+
+  submitCompanyEdit() {
+    if (!this.company) return;
+
+    if (this.companyForm.legalForm == null || this.companyForm.economicActivity == null) {
+      this.modalError = 'Please select a legal form and an economic activity.';
+      return;
+    }
+
+    const payload: Company = {
+      ...this.company,
+      name: this.companyForm.name,
+      taxCode: this.companyForm.taxCode,
+      address: this.companyForm.address,
+      legalForm: this.companyForm.legalForm,
+      economicActivity: this.companyForm.economicActivity,
+      mail: this.companyForm.mail,
+      phone: this.companyForm.phone
+    };
+
+    this.modalLoading = true;
+    this.modalError = '';
+
+    this.companyApi.updateCompany(this.company.id, this.company.rowVersion, payload).subscribe({
+      next: _ => {
+        // Refresh from the server to pick up the new rowVersion and any server-side changes.
+        this.companyApi.getById(this.company!.id).subscribe({
+          next: fresh => {
+            this.company = fresh;
+            this.companyState.company = fresh;
+            this.modalLoading = false;
+            this.closeModal();
+            this.toast.success('Company updated successfully.');
+          },
+          error: _err => {
+            this.modalLoading = false;
+            this.closeModal();
+            this.toast.success('Company updated. Reload to see the latest values.');
+          }
+        });
+      },
+      error: err => {
+        this.modalLoading = false;
+        const message = typeof err.error === 'string' ? err.error : err.error?.message;
+        this.toast.error(message);
+      }
+    });
   }
 
   // -----------------------------

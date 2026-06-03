@@ -12,5 +12,10 @@ export interface Company {
   status: number; // 0 or 1
   regDate: string;
   taxCode: string;
+  address: string;
+  legalForm: number;        // FK -> LegalFormDomain.Id
+  economicActivity: number; // FK -> EconomicActivityDomain.Id
+  mail: string;
+  phone: string;
   user?: CompanyUser | null;
 }

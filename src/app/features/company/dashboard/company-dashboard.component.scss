@@ -90,13 +90,17 @@ $dash-border-default: #bae6fd;
 
   &-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: $space-3 $space-6;
 
     > div {
       display: flex;
       flex-direction: column;
       gap: $space-1;
+    }
+
+    @media (max-width: 700px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 }
@@ -110,6 +114,16 @@ $dash-border-default: #bae6fd;
   @include text-small;
   font-weight: $font-weight-medium;
   color: $dash-text-primary;
+}
+
+.company-actions {
+  display: flex;
+  gap: $space-2;
+  margin-top: auto;
+
+  button {
+    padding: $space-1 $space-4;
+  }
 }
 
 // ============================================
@@ -454,6 +468,11 @@ label.has-error {
   border-radius: $radius-xl;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 
+  // Wider footprint for the multi-field company form (mirrors registration).
+  &.wide {
+    max-width: 680px;
+  }
+
   &-header {
     @include flex-between;
     padding: $space-4 $space-5;
@@ -549,6 +568,32 @@ label.has-error {
 .helper {
   color: $dash-text-muted;
   font-size: $font-size-xs;
+}
+
+// ============================================
+// Company Grid (modal form — mirrors registration)
+// ============================================
+.company-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4 $space-5;
+
+  .span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .modal-actions {
+    margin-top: $space-2;
+  }
+
+  input[readonly] {
+    background: $dash-bg-elevated;
+    color: $dash-text-primary;
+    cursor: default;
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 // ============================================

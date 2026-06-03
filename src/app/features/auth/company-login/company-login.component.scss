@@ -31,6 +31,12 @@ $auth-border: #bae6fd;
   border: 1px solid $auth-border;
   border-radius: $radius-xl;
   box-shadow: 0 10px 40px rgba(6, 182, 212, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: max-width $transition-base;
+
+  // Wider, more square footprint for the multi-field registration form.
+  &.wide {
+    max-width: 680px;
+  }
 
   h2 {
     @include text-title;
@@ -102,6 +108,23 @@ $auth-border: #bae6fd;
     }
   }
 
+  select {
+    padding: $space-3;
+    background: $auth-bg-surface;
+    border: 1px solid $auth-border;
+    border-radius: $radius-md;
+    color: $auth-text-primary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    transition: all $transition-base;
+
+    &:focus {
+      outline: none;
+      border-color: $auth-primary;
+      box-shadow: 0 0 0 3px rgba($auth-primary, 0.1);
+    }
+  }
+
   button[type="submit"] {
     margin-top: $space-2;
     padding: $space-3 $space-4;
@@ -122,6 +145,37 @@ $auth-border: #bae6fd;
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+  }
+}
+
+// ============================================
+// Register Grid (symmetric two-column layout)
+// ============================================
+.register-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-4 $space-5;
+
+  label {
+    margin: 0;
+  }
+
+  // Full-width rows: address + the submit button.
+  .span-2 {
+    grid-column: 1 / -1;
+  }
+
+  button[type="submit"] {
+    width: 100%;
+  }
+
+  // Collapse to a single column on narrow screens.
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+
+    .span-2 {
+      grid-column: 1 / -1;
     }
   }
 }
