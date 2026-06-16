@@ -12,8 +12,7 @@ export class CompanyApiService {
   constructor(private http: HttpClient) {}
 
   login(payload: { userName: string; password: string }): Observable<CompanyUser> {
-    console.log(`${this.baseUrl}/Login`);
-    return this.http.post<CompanyUser>(`${this.baseUrl}/Login`, payload);
+    return this.http.post<CompanyUser>(`${this.baseUrl}/AdminLogin`, payload);
   }
 
   register(dto: CompanyRequestDto): Observable<any> {

@@ -8,16 +8,17 @@ import { CompanyApiService } from '../../../core/api/company-api.service';
 import { DomainApiService } from '../../../core/api/domain-api.service';
 import { RequestApiService } from '../../../core/api/request-api.service';
 import { ProductApiService } from '../../../core/api/product-api.service';
+import { CompanyUserApiService } from '../../../core/api/company-user-api.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { DialogService } from '../../../core/services/dialog.service';
 
 import { Company } from '../../../shared/models/company.model';
 import { Request, RequestStatus } from '../../../shared/models/request.model';
 import { Product, SchedulePeriodType } from '../../../shared/models/product.model';
+import { CompanyUser, CompanyUserType, CompanyUserRequestDto } from '../../../shared/models/company-user.model';
 import { RequestDto, DomainItemDto } from '../../../shared/models/dtos.model';
-import { ScanTokenComponent } from '../scan-token/scan-token.component';
 
-type CompanyTab = 'requests' | 'products';
+type CompanyTab = 'requests' | 'products' | 'users';
 type ModalMode =
   | 'none'
   | 'companyView'
@@ -27,12 +28,15 @@ type ModalMode =
   | 'requestEdit'
   | 'productView'
   | 'productAdd'
-  | 'productEdit';
+  | 'productEdit'
+  | 'userView'
+  | 'userAdd'
+  | 'userEdit';
 
 @Component({
   selector: 'app-company-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ScanTokenComponent],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './company-dashboard.component.html',
   styleUrls: ['./company-dashboard.component.scss']
 })
@@ -41,8 +45,6 @@ export class CompanyDashboardComponent implements OnInit {
 
   activeTab: CompanyTab = 'requests';
 
-  // Scan Token overlay
-  showScanner = false;
 
   // Domain lookups (for Legal Form / Economic Activity display + dropdowns)
   legalForms: DomainItemDto[] = [];
@@ -91,6 +93,7 @@ export class CompanyDashboardComponent implements OnInit {
 
   modalRequest: Request | null = null;
   modalProduct: Product | null = null;
+  modalUser: CompanyUser | null = null;
 
   // Forms
   requestForm: RequestDto = { companyId: 0, productId: 0, serviceTokenCount: 1 };
@@ -104,6 +107,26 @@ export class CompanyDashboardComponent implements OnInit {
     price: 0,
     term: null,
     scheduleType: { periodType: SchedulePeriodType.None, periodNumber: null }
+  };
+
+  // Users tab state
+  users: CompanyUser[] = [];
+  usersLoading = false;
+  selectedUser: CompanyUser | null = null;
+
+  // Users query state (GetAllUsers does not filter by CompanyId; we filter client-side)
+  userSearch = '';
+  userSkip = 0;
+  userTake = 200;
+
+  // Expose the enum to the template
+  CompanyUserType = CompanyUserType;
+
+  userForm: CompanyUserRequestDto = {
+    userType: CompanyUserType.Other,
+    companyId: 0,
+    userName: '',
+    password: ''
   };
 
   // Pictogram state
@@ -120,7 +143,8 @@ export class CompanyDashboardComponent implements OnInit {
     private companyApi: CompanyApiService,
     private domainApi: DomainApiService,
     private requestApi: RequestApiService,
-    public productApi: ProductApiService
+    public productApi: ProductApiService,
+    public companyUserApi: CompanyUserApiService
   ) {}
 
   ngOnInit(): void {
@@ -134,6 +158,7 @@ export class CompanyDashboardComponent implements OnInit {
     this.loadDomains();
     this.loadRequests();
     this.reloadProducts();
+    this.reloadUsers();
   }
 
   setTab(tab: CompanyTab) {
@@ -768,6 +793,241 @@ export class CompanyDashboardComponent implements OnInit {
   }
 
   // -----------------------------
+  // Users
+  // -----------------------------
+  reloadUsers(silent = false) {
+    if (!this.company) return;
+
+    this.userSkip = 0;
+    this.users = [];
+    this.selectedUser = null;
+    this.loadUsersPage(true, silent);
+  }
+
+  loadUsersPage(resetSelection: boolean = false, silent = false) {
+    if (!this.company) return;
+
+    if (resetSelection) this.selectedUser = null;
+    this.usersLoading = true;
+
+    this.companyUserApi.getAll(this.userSkip, this.userTake, this.userSearch || null).subscribe({
+      next: data => {
+        const all = data ?? [];
+        // GetAllUsers does not filter by company; keep only this company's users.
+        const mine = all.filter(u => u.companyId === this.company!.id);
+
+        // Append while avoiding duplicates by id
+        const existing = new Map(this.users.map(u => [u.id, u]));
+        for (const u of mine) existing.set(u.id, u);
+
+        this.users = Array.from(existing.values()).sort((a, b) => a.id - b.id);
+        this.usersLoading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.usersLoading = false;
+        if (!silent) {
+          this.toast.errorWithRetry(
+            'Failed to load users. Please check your connection.',
+            () => this.loadUsersPage(false)
+          );
+        }
+      }
+    });
+  }
+
+  loadMoreUsers() {
+    this.userSkip += this.userTake;
+    this.loadUsersPage(false);
+  }
+
+  selectUser(u: CompanyUser) {
+    this.selectedUser = u;
+  }
+
+  onUserView() {
+    if (!this.company || !this.selectedUser) return;
+
+    this.openModal('userView', 'User details');
+    this.modalLoading = true;
+
+    // Fetch the user fresh via GetUserByName (no companyId required).
+    this.companyUserApi.getByName(this.selectedUser.userName).subscribe({
+      next: u => {
+        this.modalUser = u;
+        this.modalLoading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.modalLoading = false;
+        this.closeModal();
+
+        const message = typeof err.error === 'string' ? err.error : err.error?.message;
+        this.toast.error(message);
+      }
+    });
+  }
+
+  onUserAdd() {
+    if (!this.company) return;
+
+    this.userForm = {
+      userType: CompanyUserType.Other,
+      companyId: this.company.id,
+      userName: '',
+      password: ''
+    };
+    this.openModal('userAdd', 'Add new user');
+  }
+
+  submitUserAdd() {
+    if (!this.company) return;
+
+    if (!this.userForm.userName || this.userForm.userName.trim().length === 0) {
+      this.modalError = 'User name is required.';
+      return;
+    }
+    if (!this.userForm.password || this.userForm.password.length === 0) {
+      this.modalError = 'Password is required.';
+      return;
+    }
+
+    const dto: CompanyUserRequestDto = {
+      userType: Number(this.userForm.userType),
+      companyId: this.company.id,
+      userName: this.userForm.userName.trim(),
+      password: this.userForm.password
+    };
+
+    this.modalLoading = true;
+    this.modalError = '';
+
+    this.companyUserApi.create(dto).subscribe({
+      next: _ => {
+        this.modalLoading = false;
+        this.closeModal();
+        this.reloadUsers(true);
+        this.toast.success('User created successfully.');
+      },
+      error: err => {
+        console.error(err);
+        this.modalLoading = false;
+        const message = typeof err.error === 'string' ? err.error : err.error?.message;
+        this.toast.error(message);
+      }
+    });
+  }
+
+  onUserEdit() {
+    if (!this.company || !this.selectedUser) return;
+
+    this.openModal('userEdit', 'Edit user');
+    this.modalLoading = true;
+
+    // Fetch the user fresh via GetUserByName before editing (no companyId required).
+    this.companyUserApi.getByName(this.selectedUser.userName).subscribe({
+      next: u => {
+        this.userForm = {
+          userType: u.userType,
+          companyId: this.company!.id,
+          userName: u.userName,
+          password: u.password
+        };
+        this.modalLoading = false;
+      },
+      error: err => {
+        console.error(err);
+        this.modalLoading = false;
+        this.closeModal();
+
+        const message = typeof err.error === 'string' ? err.error : err.error?.message;
+        this.toast.error(message);
+      }
+    });
+  }
+
+  submitUserEdit() {
+    if (!this.company) return;
+
+    if (!this.userForm.userName || this.userForm.userName.trim().length === 0) {
+      this.modalError = 'User name is required.';
+      return;
+    }
+    if (!this.userForm.password || this.userForm.password.length === 0) {
+      this.modalError = 'Password is required.';
+      return;
+    }
+
+    const dto: CompanyUserRequestDto = {
+      userType: Number(this.userForm.userType),
+      companyId: this.company.id,
+      userName: this.userForm.userName.trim(),
+      password: this.userForm.password
+    };
+
+    this.modalLoading = true;
+    this.modalError = '';
+
+    this.companyUserApi.update(dto).subscribe({
+      next: _ => {
+        this.modalLoading = false;
+        this.closeModal();
+        this.reloadUsers(true);
+        this.toast.success('User updated successfully.');
+      },
+      error: err => {
+        console.error(err);
+        this.modalLoading = false;
+        const message = typeof err.error === 'string' ? err.error : err.error?.message;
+        this.toast.error(message);
+      }
+    });
+  }
+
+  async onUserDelete() {
+    if (!this.company || !this.selectedUser) return;
+
+    const userName = this.selectedUser.userName;
+    const confirmed = await this.dialog.confirm({
+      title: 'Delete User',
+      message: `Are you sure you want to delete user "${userName}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      type: 'danger'
+    });
+    if (!confirmed) return;
+
+    this.usersLoading = true;
+
+    this.companyUserApi.delete(this.company.id, userName).subscribe({
+      next: _ => {
+        this.usersLoading = false;
+        this.selectedUser = null;
+        this.reloadUsers(true);
+        this.toast.success('User deleted successfully.');
+      },
+      error: err => {
+        console.error(err);
+        this.usersLoading = false;
+        const message = typeof err.error === 'string' ? err.error : err.error?.message;
+        this.toast.error(message);
+      }
+    });
+  }
+
+  userTypeLabel(type: number): string {
+    switch (Number(type)) {
+      case CompanyUserType.Admin:
+        return 'Admin';
+      case CompanyUserType.Other:
+        return 'Other';
+      case CompanyUserType.None:
+        return 'None';
+      default:
+        return `Type ${type}`;
+    }
+  }
+
+  // -----------------------------
   // Modal helpers
   // -----------------------------
   openModal(mode: ModalMode, title: string) {
@@ -780,6 +1040,7 @@ export class CompanyDashboardComponent implements OnInit {
 
     this.modalRequest = null;
     this.modalProduct = null;
+    this.modalUser = null;
   }
 
   closeModal() {
@@ -790,6 +1051,7 @@ export class CompanyDashboardComponent implements OnInit {
     this.modalError = '';
     this.modalRequest = null;
     this.modalProduct = null;
+    this.modalUser = null;
   }
 
   // -----------------------------
