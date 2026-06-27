@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Company, CompanyUser } from '../../shared/models/company.model';
-import { CompanyRequestDto } from '../../shared/models/dtos.model';
+import { CompanyRequestDto, CompanyUpdateDto } from '../../shared/models/dtos.model';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyApiService {
@@ -34,7 +34,7 @@ export class CompanyApiService {
     return this.http.patch<void>(`${this.baseUrl}/Approve?companyId=${companyId}&rowVersion=${rowVersion}`, null);
   }
 
-  updateCompany(companyId: number, rowVersion: number, company: Company): Observable<void> {
+  updateCompany(companyId: number, rowVersion: number, company: CompanyUpdateDto): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/update?companyId=${companyId}&rowVersion=${rowVersion}`, company);
   }
 

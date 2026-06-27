@@ -581,6 +581,16 @@ label.has-error {
     grid-column: 1 / -1;
   }
 
+  // Divider for the "Payout bank account" group inside the modal form.
+  .section-title {
+    margin: $space-2 0 0;
+    padding-top: $space-4;
+    border-top: 1px solid $dash-border-default;
+    color: $dash-text-primary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+  }
+
   .modal-actions {
     margin-top: $space-2;
   }

@@ -29,6 +29,9 @@ export class CompanyLoginComponent implements OnInit {
     phone: string;
     userName: string;
     password: string;
+    bankAccountIban: string;
+    bankAccountName: string;
+    bankName: string;
   } = {
     name: '',
     taxCode: '',
@@ -38,7 +41,10 @@ export class CompanyLoginComponent implements OnInit {
     mail: '',
     phone: '',
     userName: '',
-    password: ''
+    password: '',
+    bankAccountIban: '',
+    bankAccountName: '',
+    bankName: ''
   };
 
   // Dropdown sources (loaded from the *Domain tables).
@@ -115,7 +121,10 @@ export class CompanyLoginComponent implements OnInit {
       mail: this.registerModel.mail,
       phone: this.registerModel.phone,
       userName: this.registerModel.userName,
-      password: this.registerModel.password
+      password: this.registerModel.password,
+      bankAccountIban: this.registerModel.bankAccountIban,
+      bankAccountName: this.registerModel.bankAccountName,
+      bankName: this.registerModel.bankName
     };
 
     this.loading = true;

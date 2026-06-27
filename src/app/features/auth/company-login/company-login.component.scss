@@ -166,6 +166,22 @@ $auth-border: #bae6fd;
     grid-column: 1 / -1;
   }
 
+  // Section divider inside the registration grid (e.g. "Payout bank account").
+  .section-title {
+    margin: $space-2 0 0;
+    padding-top: $space-4;
+    border-top: 1px solid $auth-border;
+    color: $auth-text-primary;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+  }
+
+  .section-hint {
+    margin: 0;
+    color: $auth-text-muted;
+    font-size: $font-size-xs;
+  }
+
   button[type="submit"] {
     width: 100%;
   }

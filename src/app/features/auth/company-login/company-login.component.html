@@ -52,6 +52,25 @@
       Phone
       <input type="tel" [(ngModel)]="registerModel.phone" name="phone" required />
     </label>
+
+    <h3 class="section-title span-2">Payout bank account</h3>
+    <p class="section-hint span-2">
+      The account your company is paid into when a customer's card payment is split.
+      Optional — you can add it later from the dashboard.
+    </p>
+    <label class="span-2">
+      IBAN
+      <input type="text" [(ngModel)]="registerModel.bankAccountIban" name="bankAccountIban" />
+    </label>
+    <label>
+      Beneficiary Name
+      <input type="text" [(ngModel)]="registerModel.bankAccountName" name="bankAccountName" />
+    </label>
+    <label>
+      Bank Name
+      <input type="text" [(ngModel)]="registerModel.bankName" name="bankName" />
+    </label>
+
     <label>
       Username
       <input type="text" [(ngModel)]="registerModel.userName" name="regUserName" required />

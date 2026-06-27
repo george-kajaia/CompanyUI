@@ -274,6 +274,23 @@
                      [readonly]="modalMode === 'companyView'" required />
             </label>
 
+            <h4 class="section-title span-2">Payout bank account</h4>
+            <label class="span-2">
+              IBAN
+              <input type="text" [(ngModel)]="companyForm.bankAccountIban" name="cBankAccountIban"
+                     [readonly]="modalMode === 'companyView'" />
+            </label>
+            <label>
+              Beneficiary Name
+              <input type="text" [(ngModel)]="companyForm.bankAccountName" name="cBankAccountName"
+                     [readonly]="modalMode === 'companyView'" />
+            </label>
+            <label>
+              Bank Name
+              <input type="text" [(ngModel)]="companyForm.bankName" name="cBankName"
+                     [readonly]="modalMode === 'companyView'" />
+            </label>
+
             <div class="modal-actions span-2">
               <button *ngIf="modalMode === 'companyEdit'" type="submit" [disabled]="modalLoading">Save</button>
               <button type="button" class="secondary" (click)="closeModal()">

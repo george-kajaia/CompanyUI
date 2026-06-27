@@ -1,3 +1,5 @@
+import { Company } from './company.model';
+
 export interface LoginCredentialDto {
   userName: string;
   password: string;
@@ -14,7 +16,24 @@ export interface CompanyRequestDto {
   phone: string;
   userName: string;
   password: string;
+
+  // ── Payout bank account (one-to-one). The company is paid into this IBAN when
+  //    a customer's card payment is split; the company is NOT a Flitt merchant.
+  //    Sent flat (not nested) because the API binds them onto CompanyRequestDto.
+  //    Optional: the API only creates a CompanyBankAccount when an IBAN is supplied. ──
+  bankAccountIban: string;
+  bankAccountName: string; // beneficiary name on the transfer
+  bankName: string;        // informational
 }
+
+// Body shape for Company update. The API's PUT /Company/update binds onto
+// CompanyRequestDto, so the bank account must be flattened (bankAccountIban / …),
+// even though GetById returns it nested under Company.bankAccount.
+export type CompanyUpdateDto = Company & {
+  bankAccountIban: string;
+  bankAccountName: string;
+  bankName: string;
+};
 
 // Generic lookup item for *Domain tables (Id, Name).
 // Used to populate the Legal Form / Economic Activity dropdowns.

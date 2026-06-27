@@ -16,7 +16,7 @@ import { Company } from '../../../shared/models/company.model';
 import { Request, RequestStatus } from '../../../shared/models/request.model';
 import { Product, SchedulePeriodType } from '../../../shared/models/product.model';
 import { CompanyUser, CompanyUserType, CompanyUserRequestDto } from '../../../shared/models/company-user.model';
-import { RequestDto, DomainItemDto } from '../../../shared/models/dtos.model';
+import { RequestDto, DomainItemDto, CompanyUpdateDto } from '../../../shared/models/dtos.model';
 
 type CompanyTab = 'requests' | 'products' | 'users';
 type ModalMode =
@@ -59,6 +59,9 @@ export class CompanyDashboardComponent implements OnInit {
     economicActivity: number | null;
     mail: string;
     phone: string;
+    bankAccountIban: string;
+    bankAccountName: string;
+    bankName: string;
   } = {
     name: '',
     taxCode: '',
@@ -66,7 +69,10 @@ export class CompanyDashboardComponent implements OnInit {
     legalForm: null,
     economicActivity: null,
     mail: '',
-    phone: ''
+    phone: '',
+    bankAccountIban: '',
+    bankAccountName: '',
+    bankName: ''
   };
 
   // Requests tab state
@@ -201,7 +207,11 @@ export class CompanyDashboardComponent implements OnInit {
       legalForm: this.company.legalForm,
       economicActivity: this.company.economicActivity,
       mail: this.company.mail,
-      phone: this.company.phone
+      phone: this.company.phone,
+      // Read shape: bank account is nested under the company (GetById includes it).
+      bankAccountIban: this.company.bankAccount?.iban ?? '',
+      bankAccountName: this.company.bankAccount?.beneficiaryName ?? '',
+      bankName: this.company.bankAccount?.bankName ?? ''
     };
   }
 
@@ -225,7 +235,7 @@ export class CompanyDashboardComponent implements OnInit {
       return;
     }
 
-    const payload: Company = {
+    const payload: CompanyUpdateDto = {
       ...this.company,
       name: this.companyForm.name,
       taxCode: this.companyForm.taxCode,
@@ -233,7 +243,12 @@ export class CompanyDashboardComponent implements OnInit {
       legalForm: this.companyForm.legalForm,
       economicActivity: this.companyForm.economicActivity,
       mail: this.companyForm.mail,
-      phone: this.companyForm.phone
+      phone: this.companyForm.phone,
+      // Write shape: the API binds onto CompanyRequestDto, so the bank account is
+      // sent flat. An empty IBAN tells the API to clear the stored account.
+      bankAccountIban: this.companyForm.bankAccountIban?.trim() ?? '',
+      bankAccountName: this.companyForm.bankAccountName?.trim() ?? '',
+      bankName: this.companyForm.bankName?.trim() ?? ''
     };
 
     this.modalLoading = true;
